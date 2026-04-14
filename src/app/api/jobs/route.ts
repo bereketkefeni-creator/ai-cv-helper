@@ -13,7 +13,16 @@ export async function POST(request: Request) {
     }
 
     const resultJson = await suggestJobs(cvText);
-    const jobs = JSON.parse(resultJson);
+    const parsed = JSON.parse(resultJson);
+
+    const jobs = Array.isArray(parsed)
+      ? parsed.filter(
+          (j: Record<string, unknown>) =>
+            typeof j.title === "string" &&
+            typeof j.company === "string" &&
+            Array.isArray(j.requirements)
+        )
+      : [];
 
     return NextResponse.json({ jobs });
   } catch (error) {

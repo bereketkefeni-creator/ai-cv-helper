@@ -13,7 +13,14 @@ export async function POST(request: Request) {
     }
 
     const resultJson = await improveCV(cvText);
-    const result = JSON.parse(resultJson);
+    const parsed = JSON.parse(resultJson);
+
+    const result =
+      typeof parsed.improvedCV === "string" &&
+      Array.isArray(parsed.changes) &&
+      Array.isArray(parsed.tips)
+        ? parsed
+        : { improvedCV: "", changes: [], tips: [] };
 
     return NextResponse.json(result);
   } catch (error) {

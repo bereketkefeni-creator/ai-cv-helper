@@ -13,7 +13,14 @@ export async function POST(request: Request) {
     }
 
     const resultJson = await generateCoverLetter(cvText, jobTitle, company);
-    const result = JSON.parse(resultJson);
+    const parsed = JSON.parse(resultJson);
+
+    const result =
+      typeof parsed.coverLetter === "string" &&
+      typeof parsed.jobTitle === "string" &&
+      typeof parsed.company === "string"
+        ? parsed
+        : { coverLetter: "", jobTitle, company };
 
     return NextResponse.json(result);
   } catch (error) {
