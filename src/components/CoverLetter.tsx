@@ -81,7 +81,7 @@ export default function CoverLetter({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `cover-letter-${company.toLowerCase().replace(/\s+/g, "-")}.txt`;
+    a.download = `cover-letter-${result.company.toLowerCase().replace(/\s+/g, "-")}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
