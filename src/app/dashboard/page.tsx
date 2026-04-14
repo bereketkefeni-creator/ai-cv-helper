@@ -30,10 +30,21 @@ function subscribeNoop(cb: () => void) {
   return () => {};
 }
 
+let cachedCVString: string | null = null;
+let cachedCVData: CVSessionData | null = null;
+
 function getSessionCVData(): CVSessionData | null {
   const stored = sessionStorage.getItem("cvData");
-  if (!stored) return null;
-  return JSON.parse(stored) as CVSessionData;
+  if (!stored) {
+    cachedCVString = null;
+    cachedCVData = null;
+    return null;
+  }
+  if (stored !== cachedCVString) {
+    cachedCVString = stored;
+    cachedCVData = JSON.parse(stored) as CVSessionData;
+  }
+  return cachedCVData;
 }
 
 function getServerSnapshot(): CVSessionData | null {
@@ -51,6 +62,9 @@ export default function DashboardPage() {
   const handleGenerateCoverLetter = (jobTitle: string, company: string) => {
     setCoverLetterJob({ title: jobTitle, company });
     setActiveTab("cover-letter");
+  };
+
+  const handleCoverLetterGenerated = () => {
     setCoverLettersGenerated((prev) => prev + 1);
   };
 
@@ -152,6 +166,7 @@ export default function DashboardPage() {
             initialCompany={coverLetterJob.company}
             isPro={isPro}
             coverLettersGenerated={coverLettersGenerated}
+            onGenerated={handleCoverLetterGenerated}
           />
         )}
       </div>

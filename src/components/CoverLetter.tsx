@@ -10,6 +10,7 @@ interface Props {
   initialCompany?: string;
   isPro: boolean;
   coverLettersGenerated: number;
+  onGenerated?: () => void;
 }
 
 export default function CoverLetter({
@@ -18,6 +19,7 @@ export default function CoverLetter({
   initialCompany = "",
   isPro,
   coverLettersGenerated,
+  onGenerated,
 }: Props) {
   const [jobTitle, setJobTitle] = useState(initialJobTitle);
   const [company, setCompany] = useState(initialCompany);
@@ -56,6 +58,7 @@ export default function CoverLetter({
       if (!response.ok) throw new Error(data.error);
 
       setResult(data);
+      onGenerated?.();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to generate cover letter"
