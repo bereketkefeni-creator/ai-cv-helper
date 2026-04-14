@@ -41,7 +41,8 @@ Return ONLY valid JSON, no markdown.`,
     ],
     temperature: 0.3,
   });
-  return response.choices[0].message.content ?? "{}";
+  const defaultAnalysis = JSON.stringify({ score: 0, summary: "Analysis unavailable", strengths: [], weaknesses: [], skills: [], experience: [], education: [] });
+  return response.choices[0].message.content ?? defaultAnalysis;
 }
 
 export async function improveCV(cvText: string): Promise<string> {
@@ -66,7 +67,8 @@ Make the CV more impactful with stronger action verbs, better formatting suggest
     ],
     temperature: 0.5,
   });
-  return response.choices[0].message.content ?? "{}";
+  const defaultImprovement = JSON.stringify({ improvedCV: "", changes: [], tips: [] });
+  return response.choices[0].message.content ?? defaultImprovement;
 }
 
 export async function suggestJobs(cvText: string): Promise<string> {
@@ -125,5 +127,6 @@ The cover letter should be professional, highlight relevant experience from the 
     ],
     temperature: 0.6,
   });
-  return response.choices[0].message.content ?? "{}";
+  const defaultCoverLetter = JSON.stringify({ coverLetter: "", jobTitle, company });
+  return response.choices[0].message.content ?? defaultCoverLetter;
 }

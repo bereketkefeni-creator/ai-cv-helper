@@ -36,21 +36,35 @@ export async function POST(request: Request) {
       );
     }
 
+    const fallbackAnalysis = {
+      score: 0,
+      summary: "AI analysis unavailable. Please check your OPENAI_API_KEY.",
+      strengths: [],
+      weaknesses: [],
+      skills: [],
+      experience: [],
+      education: [],
+    };
+
     let analysis;
     try {
       const analysisJson = await analyzeCV(rawText);
-      analysis = JSON.parse(analysisJson);
+      const parsed = JSON.parse(analysisJson);
+
+      // Validate required array fields exist to prevent dashboard crashes
+      if (
+        !Array.isArray(parsed.strengths) ||
+        !Array.isArray(parsed.weaknesses) ||
+        !Array.isArray(parsed.skills) ||
+        !Array.isArray(parsed.experience) ||
+        !Array.isArray(parsed.education)
+      ) {
+        analysis = fallbackAnalysis;
+      } else {
+        analysis = parsed;
+      }
     } catch {
-      // If AI analysis fails, return raw text with a basic analysis
-      analysis = {
-        score: 0,
-        summary: "AI analysis unavailable. Please check your OPENAI_API_KEY.",
-        strengths: [],
-        weaknesses: [],
-        skills: [],
-        experience: [],
-        education: [],
-      };
+      analysis = fallbackAnalysis;
     }
 
     return NextResponse.json({
