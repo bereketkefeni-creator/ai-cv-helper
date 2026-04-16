@@ -71,6 +71,12 @@ const RATE_LIMIT_MAX_REQUESTS = 20; // max requests per window per IP
 /**
  * Simple in-memory sliding-window rate limiter.
  * Returns `null` when allowed, or a `NextResponse` 429 when exceeded.
+ *
+ * NOTE: IP extraction relies on `x-forwarded-for` / `x-real-ip` headers
+ * which are only trustworthy when set by a trusted reverse proxy (Vercel,
+ * Cloudflare, nginx, etc.). Without a proxy, all requests fall back to the
+ * "unknown" key — effectively a stricter global rate limit. For deployments
+ * without a trusted proxy, use infrastructure-level rate limiting instead.
  */
 export function checkRateLimit(
   request: Request
@@ -133,6 +139,12 @@ function safeEqual(a: string, b: string): boolean {
  * Check whether the request originates from the app's own frontend.
  * Same-origin browser requests include an `origin` or `referer` header
  * that matches the `Host` header, so we can skip the API key for those.
+ *
+ * SECURITY NOTE: This is a convenience bypass, NOT a security boundary.
+ * `Origin`/`Referer` headers are browser-enforced (forbidden headers) but
+ * can be spoofed by non-browser HTTP clients. The real auth boundary for
+ * external programmatic consumers is the `API_SECRET_KEY` Bearer token.
+ * Browser CORS + rate limiting provide the remaining layers of defense.
  */
 function isSameOriginRequest(request: Request): boolean {
   const host = request.headers.get("host");
