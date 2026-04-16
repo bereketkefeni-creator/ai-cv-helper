@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual, createHash } from "crypto";
 
 // ---------- Input validation ----------
 
@@ -106,7 +107,7 @@ export function checkRateLimit(
 }
 
 // Periodically clean up stale entries to prevent memory leaks
-setInterval(() => {
+const cleanupInterval = setInterval(() => {
   const now = Date.now();
   for (const [ip, entry] of rateLimitMap) {
     if (now > entry.resetAt) {
@@ -114,14 +115,56 @@ setInterval(() => {
     }
   }
 }, RATE_LIMIT_WINDOW_MS);
+cleanupInterval.unref();
 
 // ---------- API key authentication ----------
 
 /**
+ * Constant-time string comparison via SHA-256 hashing.
+ * Prevents timing side-channel attacks on secret values.
+ */
+function safeEqual(a: string, b: string): boolean {
+  const ha = createHash("sha256").update(a).digest();
+  const hb = createHash("sha256").update(b).digest();
+  return timingSafeEqual(ha, hb);
+}
+
+/**
+ * Check whether the request originates from the app's own frontend.
+ * Same-origin browser requests include an `origin` or `referer` header
+ * that matches the `Host` header, so we can skip the API key for those.
+ */
+function isSameOriginRequest(request: Request): boolean {
+  const host = request.headers.get("host");
+  if (!host) return false;
+
+  const origin = request.headers.get("origin");
+  if (origin) {
+    try {
+      return new URL(origin).host === host;
+    } catch {
+      return false;
+    }
+  }
+
+  const referer = request.headers.get("referer");
+  if (referer) {
+    try {
+      return new URL(referer).host === host;
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Optional API-key gate. When `API_SECRET_KEY` is set in the environment,
- * every API request must include a matching `Authorization: Bearer <key>`
- * header. When the env var is *not* set the check is skipped so local
- * development still works without extra configuration.
+ * external API requests must include a matching `Authorization: Bearer <key>`
+ * header. Same-origin requests from the built-in frontend are allowed
+ * through without a key. When the env var is *not* set the check is
+ * skipped entirely so local development works without extra configuration.
  */
 export function checkApiKey(request: Request): NextResponse | null {
   const secret = process.env.API_SECRET_KEY;
@@ -130,12 +173,17 @@ export function checkApiKey(request: Request): NextResponse | null {
     return null;
   }
 
+  // Allow same-origin requests from the built-in frontend
+  if (isSameOriginRequest(request)) {
+    return null;
+  }
+
   const authHeader = request.headers.get("authorization") ?? "";
   const token = authHeader.startsWith("Bearer ")
     ? authHeader.slice(7).trim()
     : "";
 
-  if (token !== secret) {
+  if (!token || !safeEqual(token, secret)) {
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 401 }
