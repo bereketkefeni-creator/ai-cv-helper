@@ -1,16 +1,27 @@
 import { NextResponse } from "next/server";
 import { suggestJobs } from "@/lib/openai";
+import {
+  checkRateLimit,
+  checkApiKey,
+  validateStringField,
+  sanitizeString,
+  MAX_CV_TEXT_LENGTH,
+} from "@/lib/security";
 
 export async function POST(request: Request) {
-  try {
-    const { cvText } = await request.json();
+  const rateLimitError = checkRateLimit(request);
+  if (rateLimitError) return rateLimitError;
 
-    if (!cvText) {
-      return NextResponse.json(
-        { error: "No CV text provided" },
-        { status: 400 }
-      );
-    }
+  const authError = checkApiKey(request);
+  if (authError) return authError;
+
+  try {
+    const body = await request.json();
+
+    const cvTextError = validateStringField(body.cvText, "cvText", MAX_CV_TEXT_LENGTH);
+    if (cvTextError) return cvTextError;
+
+    const cvText = sanitizeString(body.cvText as string);
 
     const resultJson = await suggestJobs(cvText);
     const parsed = JSON.parse(resultJson);
