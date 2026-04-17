@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { CVImprovement as CVImprovementType } from "@/lib/types";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
   Loader2,
@@ -54,30 +55,51 @@ export default function CVImprove({ cvText, isPro }: Props) {
 
   if (!isPro) {
     return (
-      <div className="rounded-2xl border-2 border-dashed border-purple-200 bg-purple-50/50 p-8 text-center">
-        <Sparkles className="mx-auto h-12 w-12 text-purple-400" />
-        <h3 className="mt-4 text-lg font-semibold text-gray-900">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="glass glow-hover rounded-2xl p-8 text-center"
+        style={{ border: "1px dashed rgba(168, 85, 247, 0.3)" }}
+      >
+        <motion.div
+          animate={{ rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+        >
+          <Sparkles className="mx-auto h-12 w-12 text-purple-400" />
+        </motion.div>
+        <h3 className="mt-4 text-lg font-semibold text-white">
           Pro Feature: AI CV Rewrite
         </h3>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-slate-400">
           Upgrade to Pro to get a fully rewritten, optimized CV that stands out
           to recruiters.
         </p>
-        <button className="mt-4 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="btn-shine mt-4 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25"
+        >
           Upgrade to Pro — $9.99/mo
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
     );
   }
 
   return (
     <div className="space-y-6">
       {!result && (
-        <div className="text-center">
-          <button
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center"
+        >
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleImprove}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-3 text-sm font-medium text-white shadow-sm transition-all hover:shadow-md disabled:opacity-60"
+            className="btn-shine inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-3 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 disabled:opacity-60"
           >
             {loading ? (
               <>
@@ -90,48 +112,65 @@ export default function CVImprove({ cvText, isPro }: Props) {
                 AI Rewrite My CV
               </>
             )}
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       )}
 
-      {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="rounded-lg bg-red-500/10 p-4 text-sm text-red-300 ring-1 ring-red-500/20"
+          >
+            {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {result && (
-        <div className="space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-6"
+        >
           {/* Changes made */}
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+          <div className="glass glow-hover rounded-2xl p-6">
             <div className="mb-4 flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <h3 className="font-semibold text-gray-900">Changes Made</h3>
+              <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+              <h3 className="font-semibold text-white">Changes Made</h3>
             </div>
             <ul className="space-y-2">
               {result.changes.map((change, i) => (
-                <li
+                <motion.li
                   key={i}
-                  className="flex items-start gap-2 text-sm text-gray-600"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-start gap-2 text-sm text-slate-300"
                 >
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green-500" />
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
                   {change}
-                </li>
+                </motion.li>
               ))}
             </ul>
           </div>
 
           {/* Improved CV */}
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+          <div className="glass glow-hover rounded-2xl p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-semibold text-gray-900">Your Improved CV</h3>
-              <button
+              <h3 className="font-semibold text-white">Your Improved CV</h3>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-100"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
               >
                 {copied ? (
                   <>
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-4 w-4 text-emerald-400" />
                     Copied!
                   </>
                 ) : (
@@ -140,32 +179,35 @@ export default function CVImprove({ cvText, isPro }: Props) {
                     Copy
                   </>
                 )}
-              </button>
+              </motion.button>
             </div>
-            <div className="whitespace-pre-wrap rounded-xl bg-gray-50 p-6 font-mono text-sm leading-relaxed text-gray-700">
+            <div className="whitespace-pre-wrap rounded-xl bg-white/5 p-6 font-mono text-sm leading-relaxed text-slate-300 ring-1 ring-white/10">
               {result.improvedCV}
             </div>
           </div>
 
           {/* Tips */}
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+          <div className="glass glow-hover rounded-2xl p-6">
             <div className="mb-4 flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-amber-500" />
-              <h3 className="font-semibold text-gray-900">Pro Tips</h3>
+              <Lightbulb className="h-5 w-5 text-amber-400" />
+              <h3 className="font-semibold text-white">Pro Tips</h3>
             </div>
             <ul className="space-y-2">
               {result.tips.map((tip, i) => (
-                <li
+                <motion.li
                   key={i}
-                  className="flex items-start gap-2 text-sm text-gray-600"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-start gap-2 text-sm text-slate-300"
                 >
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-400" />
                   {tip}
-                </li>
+                </motion.li>
               ))}
             </ul>
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );

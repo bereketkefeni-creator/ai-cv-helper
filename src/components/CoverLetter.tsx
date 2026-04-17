@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { CoverLetterResult } from "@/lib/types";
+import { motion, AnimatePresence } from "framer-motion";
 import { FileEdit, Loader2, Copy, Check, Download } from "lucide-react";
 
 interface Props {
@@ -89,14 +90,19 @@ export default function CoverLetter({
   return (
     <div className="space-y-6">
       {/* Input Form */}
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="glass glow-hover rounded-2xl p-6"
+      >
         <div className="mb-4 flex items-center gap-2">
-          <FileEdit className="h-5 w-5 text-blue-600" />
-          <h3 className="font-semibold text-gray-900">Generate Cover Letter</h3>
+          <FileEdit className="h-5 w-5 text-indigo-400" />
+          <h3 className="font-semibold text-white">Generate Cover Letter</h3>
         </div>
 
         {!isPro && (
-          <div className="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+          <div className="mb-4 rounded-lg bg-amber-500/10 p-3 text-sm text-amber-300 ring-1 ring-amber-500/20">
             Free plan: {maxFree - coverLettersGenerated} cover letter
             {maxFree - coverLettersGenerated !== 1 ? "s" : ""} remaining.
             Upgrade to Pro for unlimited.
@@ -107,7 +113,7 @@ export default function CoverLetter({
           <div>
             <label
               htmlFor="jobTitle"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-300"
             >
               Job Title
             </label>
@@ -117,13 +123,13 @@ export default function CoverLetter({
               value={jobTitle}
               onChange={(e) => setJobTitle(e.target.value)}
               placeholder="e.g. Senior Software Engineer"
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="glass-input mt-1 block w-full rounded-lg px-4 py-2.5 text-sm"
             />
           </div>
           <div>
             <label
               htmlFor="company"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-slate-300"
             >
               Company Name
             </label>
@@ -133,13 +139,15 @@ export default function CoverLetter({
               value={company}
               onChange={(e) => setCompany(e.target.value)}
               placeholder="e.g. Google"
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 shadow-sm transition-colors focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="glass-input mt-1 block w-full rounded-lg px-4 py-2.5 text-sm"
             />
           </div>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={handleGenerate}
             disabled={loading || !canGenerate}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+            className="btn-shine inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 disabled:opacity-60"
           >
             {loading ? (
               <>
@@ -152,31 +160,45 @@ export default function CoverLetter({
                 Generate Cover Letter
               </>
             )}
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
-      {error && (
-        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="rounded-lg bg-red-500/10 p-4 text-sm text-red-300 ring-1 ring-red-500/20"
+          >
+            {error}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Result */}
       {result && (
-        <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="glass glow-hover rounded-2xl p-6"
+        >
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900">
+            <h3 className="font-semibold text-white">
               Cover Letter for {result.jobTitle} at {result.company}
             </h3>
             <div className="flex items-center gap-2">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleCopy}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-100"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
               >
                 {copied ? (
                   <>
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-4 w-4 text-emerald-400" />
                     Copied!
                   </>
                 ) : (
@@ -185,20 +207,22 @@ export default function CoverLetter({
                     Copy
                   </>
                 )}
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleDownload}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-100"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
               >
                 <Download className="h-4 w-4" />
                 Download
-              </button>
+              </motion.button>
             </div>
           </div>
-          <div className="whitespace-pre-wrap rounded-xl bg-gray-50 p-6 text-sm leading-relaxed text-gray-700">
+          <div className="whitespace-pre-wrap rounded-xl bg-white/5 p-6 text-sm leading-relaxed text-slate-300 ring-1 ring-white/10">
             {result.coverLetter}
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );

@@ -30,9 +30,14 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col bg-gray-50">
+      <body className="bg-animated-gradient relative flex min-h-full flex-col overflow-x-hidden">
+        {/* Floating orbs */}
+        <div className="orb orb-1 -left-64 top-0" />
+        <div className="orb orb-2 -right-48 top-1/3" />
+        <div className="orb orb-3 left-1/4 bottom-0" />
+
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="relative z-10 flex-1">{children}</main>
       </body>
     </html>
   );
